@@ -16,14 +16,12 @@ const guiaSchema = Schema({
     numero: {   // 1, 2 , etc
         type: Number,
         required: 'Falta el numero de guia'
-    },
-    
+    },    
     contenidoHtml: {  
         //intro o texto renderizado a html antes de las preguntas
         type: String,
         required: 'Falta titulo y/o descripcion'
-    },  
-    
+    },      
     fechaRegistro: {
         type: Date,
         default: Date.now()

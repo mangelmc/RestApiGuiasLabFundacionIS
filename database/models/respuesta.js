@@ -1,27 +1,30 @@
 const mongoose = require('../connect');
 const Schema = mongoose.Schema;
 
-const preguntaSchema = Schema({
-    guia: {
+const respuestaSchema = Schema({
+    laboratorio: {
         type: Schema.Types.ObjectId,
-        ref: "Guia",
-        require:'Falta info de la Guia'
-    },
-    tipo: {
-        type: String,
-        required: 'Debe definir el tipo de pregunta'
-    },   
-    contenido: {
-        type: String,
-        required: 'falyta el contenido de pregunta'
+        ref: "Laboratorio",
+        require:'Falta info del Laboratorio'
+    },/*
+    estudiante: {
+        type: Schema.Types.ObjectId,
+        ref: "Usuario",
+        require:'Falta info del Estudiante'
+    },*/
+    pregunta: {
+        type: Schema.Types.ObjectId,
+        ref: "Pregunta",
+        require:'Falta info de Pregunta'
     },
     respuesta: {
         type: String,
-        required: 'Falta  respuesta a la pregunta'
-    },
-    valorS100: {
+        default: ''
+    },    
+    calificacionS100: {
         type: Number,
-        required: 'Falta el valor sobre 100'
+        required: 'Falta la calificacion nn/100',
+        default:0
     },   
     fechaRegistro: {
         type: Date,
@@ -29,6 +32,6 @@ const preguntaSchema = Schema({
     }
 });
 
-const pregunta = mongoose.model('Pregunta', preguntaSchema);
+const respuesta = mongoose.model('Respuesta', respuestaSchema);
 
-module.exports = pregunta;
+module.exports = respuesta;

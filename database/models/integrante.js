@@ -19,7 +19,8 @@ const integranteSchema = Schema({
     },  
     nota: {   // 1, 2 , etc
         type: Number,
-        required: 'Falta la nota'
+        required: 'Falta la nota',
+        default:0
     },
     fechaRegistro: {
         type: Date,

@@ -15,9 +15,10 @@ const laboratorioSchema = Schema({
     },
     nota: {   
         type: Number,
-        required: 'Falta la Nota'
+        required: 'Falta la Nota',
+        default:0
     },
-    gestion: {   // revisado , por revisar
+    estado: {   // revisado , por revisar
         type: String,
         required: 'Es necesario el estado',
         default: 'por revisar'
