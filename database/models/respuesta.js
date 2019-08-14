@@ -21,9 +21,9 @@ const respuestaSchema = Schema({
         type: String,
         default: ''
     },    
-    calificacionS100: {
+    calificacion: {
         type: Number,
-        required: 'Falta la calificacion nn/100',
+        required: 'Falta la calificacion',
         default:0
     },   
     fechaRegistro: {

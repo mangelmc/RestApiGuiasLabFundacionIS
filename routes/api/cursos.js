@@ -27,8 +27,13 @@ router.post("/", (req, res) => {
 });
 /* listar Cursos */
 router.get('/', function (req, res, next) {
-
-    Curso.find().select('-__v').exec().then(docs => {
+    let criterios = {};
+    //Cursos de un docente
+    if (req.query.docente != undefined && req.query.docente != '') {
+        criterios.docente = req.query.docente;
+        //console.log(criterios);
+    }
+    Curso.find(criterios).select('-__v').populate('materia','-__v').exec().then(docs => {
         if(docs.length == 0){
         return res.status(404).json({message: 'No existen Cursos disponibles'});
         }
@@ -40,13 +45,14 @@ router.get('/', function (req, res, next) {
         })
     });
 });
-/* LIstar Cursos de un docente */
-router.get('/docente/:id', function (req, res, next) {
-    Curso.find({docente:req.params.id}).select('-__v').exec().then(docs => {
-        if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Cursos registrados'});
+/* devolver un Curso */
+router.get('/:id', function (req, res) {
+    let criterios = {_id: req.params.id};    
+    Curso.findOne(criterios).select('-__v').populate('materia','-__v').exec().then(doc => {
+        if(doc == null){
+            return res.status(404).json({message: 'No existe el Recurso'});
         }
-        res.json({data:docs});
+        res.json(doc);
     })
     .catch(err => {
         res.status(500).json({
@@ -54,7 +60,6 @@ router.get('/docente/:id', function (req, res, next) {
         })
     });
 });
-
 //// no son necesarios VVVVVVV
 
 router.patch('/:id', function (req, res) {

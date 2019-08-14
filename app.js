@@ -26,6 +26,33 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+//Allow CORS
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:4000");//el host del que se permitiran las peticiones 
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,authorization");
+  res.header('Access-Control-Allow-Methods', 'PUT, GET, POST, DELETE, PATCH,OPTIONS');
+  //next();
+  //Las peticiones de tipo OPTIONS son mandadas automáticamente por el navegador para comprobas cuales son las cabeceras que van a enviarse, por tanto si la petición es de tipo 'OPTIONS', no ejecutaremos más middelwares porque sólo queríamos comprobar las cabeceras. Si no es de tipo OPTIONS, continuamos con el siguiente MIDDLEWARE
+  if(req.method === 'OPTIONS') {
+    res.send('Success');
+  } else {
+      next();
+  }
+});
+/*app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, access-token');
+
+  //Las peticiones de tipo OPTIONS son mandadas automáticamente por el navegador para comprobas cuales son las cabeceras que van a enviarse, por tanto si la petición es de tipo 'OPTIONS', no ejecutaremos más middelwares porque sólo queríamos comprobar las cabeceras. Si no es de tipo OPTIONS, continuamos con el siguiente MIDDLEWARE
+  if(req.method === 'OPTIONS') {
+      res.send('Success');
+  } else {
+      next();
+  }
+});*/
+
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
@@ -38,7 +65,6 @@ app.use('/api/guias', guiasRouter);
 app.use('/api/preguntas', preguntasRouter);
 app.use('/api/laboratorios', laboratoriosRouter);
 app.use('/api/respuestas', respuestasRouter);
-
 
 
 

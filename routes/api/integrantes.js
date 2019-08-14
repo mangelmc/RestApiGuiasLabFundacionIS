@@ -28,10 +28,15 @@ router.post("/", (req, res) => {
 
 /* listar Integrantes */
 router.get('/', function (req, res, next) {
+    criterios = {};
+    /* LIstar Integrantes de un Curso */
+    if (req.query.curso != undefined) {
+        criterios.curso = req.query.curso
+    }
 
-    Integrante.find().select('-__v').exec().then(docs => {
+    Integrante.find(criterios).populate('estudiante', '-password -__v -tipo').select('-__v').exec().then(docs => {
         if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Integrantes disponibles'});
+            return res.status(404).json({message: 'No existen Integrantes disponibles'});
         }
         res.json({data:docs});
     })
@@ -42,20 +47,7 @@ router.get('/', function (req, res, next) {
     });
 });
 
-/* LIstar Integrantes de un Curso */
-router.get('/curso/:id', function (req, res, next) {
-    Integrante.find({curso:req.params.id}).select('-__v').exec().then(docs => {
-        if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Integrantes registrados'});
-        }
-        res.json({data:docs});
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err.message
-        })
-    });
-});
+
 
 
 

@@ -7,30 +7,46 @@ const Respuesta = require('../../database/models/respuesta');
 
 /* Agregar nuevo Respuesta */
 router.post("/", (req, res) => {
-        let fields = req.body;
-        let datos = {
-            laboratorio:fields.laboratorio,
-            pregunta:fields.pregunta,
-            respuesta:fields.respuesta,          
-        }
-        const modelRespuesta = new Respuesta(datos);
-        modelRespuesta.save()
-          
-          .then(result => {
+    let fields = req.body;
+    
+    let datos = {
+        laboratorio:fields.laboratorio,
+        pregunta:fields.pregunta,
+        respuesta:fields.respuesta,          
+    }
+    const modelRespuesta = new Respuesta(datos);
+    Respuesta.findOne({pregunta: fields.pregunta}).exec()
+    .then(doc=>{
+        
+        if (doc != null) {
+            res.status(200).json({error: 'La respuesta ya existe'});
+            return false;
+        }else{
+            return modelRespuesta.save()
+        }   
+    })        
+    .then(result => {
+        
+        if (result != false) {
             res.status(201).json({message: 'Se Agrego  Respuesta',result});
-          })
-          .catch(err => {
-            res.status(500).json({error:err.message})
-          });  
+        }
+    })
+    .catch(err => {
+        res.status(500).json({error:err.message})
+    });  
 });
 /* listar Respuestas */
-router.get('/', function (req, res, next) {
+router.get('/', function (req, res) {
 
-    Respuesta.find().select('-__v').exec().then(docs => {
+    Respuesta.find().populate('pregunta','-__v').select('-__v').exec()
+    .then(docs => {
         if(docs.length == 0){
         return res.status(404).json({message: 'No existen Respuestas disponibles'});
         }
-        res.json({data:docs});
+        res.json({
+            data: docs,
+            count: docs.length
+        });
     })
     .catch(err => {
         res.status(500).json({
@@ -38,9 +54,10 @@ router.get('/', function (req, res, next) {
         })
     });
 });
-/* LIstar Respuesta de un Laboratorio */
+/* Listar Respuesta de un Laboratorio */
 router.get('/laboratorio/:id', function (req, res, next) {
-    Respuesta.find({laboratorio:req.params.id}).select('-__v').exec().then(docs => {
+    Respuesta.find({laboratorio:req.params.id}).select('-__v').exec()
+    .then(docs => {
         if(docs.length == 0){
         return res.status(404).json({message: 'No existen Respuestas registrados'});
         }
@@ -56,6 +73,7 @@ router.get('/laboratorio/:id', function (req, res, next) {
 
 
 router.patch('/:id', function (req, res) {
+    
     let idRespuesta = req.params.id;
     const datos = {};
 
@@ -64,6 +82,7 @@ router.patch('/:id', function (req, res) {
         datos[key] = req.body[key];  
       }  
     });
+    
     Respuesta.updateOne({_id: idRespuesta}, datos).exec()
         .then(result => {
             let message = 'Datos actualizados';
