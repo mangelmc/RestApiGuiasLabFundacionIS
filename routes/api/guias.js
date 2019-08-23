@@ -27,33 +27,36 @@ router.post("/", (req, res) => {
 });
 /* listar Guias */
 router.get('/', function (req, res, next) {
+    let criterios = {};
+    /* LIstar Guias de un docente */
+    if (req.query.docente != undefined) {
+        criterios.docente = req.query.docente;
+    }
+    /* LIstar Guias de un curso */
+    if (req.query.curso != undefined) {
+        criterios.curso = req.query.curso;
+    }
+    Guia.find(criterios).select('-__v -docente').populate({
+        path: 'curso',
+        select: '-__v -docente -gestion -fechaRegistro',
+        populate: { 
+            path: 'materia',
+            select: '-__v -fechaRegistro',
+        }}).exec()
+        .then(docs => {
+            if(docs.length == 0){
+                return res.status(404).json({message: 'No existen Guias disponibles'});
+            }
+            res.json({data:docs,count:docs.length});
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err.message
+            })
+        });
+});
 
-    Guia.find().select('-__v').exec().then(docs => {
-        if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Guias disponibles'});
-        }
-        res.json({data:docs});
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err.message
-        })
-    });
-});
-/* LIstar Guias de un docente */
-router.get('/docente/:id', function (req, res, next) {
-    Guia.find({docente:req.params.id}).select('-__v').exec().then(docs => {
-        if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Guias registrados'});
-        }
-        res.json({data:docs});
-    })
-    .catch(err => {
-        res.status(500).json({
-            error: err.message
-        })
-    });
-});
+
 
 
 

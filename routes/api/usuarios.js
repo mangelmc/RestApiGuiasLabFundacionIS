@@ -8,7 +8,7 @@ const sha1 = require('sha1');
 
 const Usuario = require('../../database/models/usuario');
 const Imagen = require('../../database/models/imagen');
-const Laboratorio = require('../../database/models/laboratorio');
+
 
 
 
@@ -98,39 +98,8 @@ Usuario.find().select('-__v -password -fechaRegistro').exec().then(docs => {
 });
 //<<<<<<<<<<<<<<<<<< insecure
 
-router.get('/estudiantes/:id', function (req, res) {
-let usuario = {};
-Usuario.findOne({_id: req.params.id}).select('-__v -password -fechaRegistro').exec()
-.then(doc => {
-	//console.log(doc);
-	if(doc == null){
-		
-		return false;//
-	}else {
-		usuario = doc;
-		return Laboratorio.find({estudiante: req.params.id}).select('-__v').populate('guia').exec();
-	}   
-})
-.then(docs => {
-	console.log(usuario,docs.length);
-	if (docs === false) {
-		return res.status(404).json({messageU: 'No se encontro el usuario'});
-	}else{
-		if(docs.length == 0){
-			return res.status(404).json({messageL: 'No existen Laboratorios registrados',usuario});
-		}
-		//console.log(docs[0].fechaRegistro.getDate() );
-		res.json({data:docs,usuario});
-	} 
-})
-.catch(err => {
-	res.status(500).json({
-		error: err.message
-	})
-});
 
 
-});
 /* Registro de usuarios */
 router.post('/', function (req, res, next) {
 //verificar que no exista mismo correo

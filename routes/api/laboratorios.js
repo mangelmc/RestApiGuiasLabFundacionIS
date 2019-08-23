@@ -41,6 +41,7 @@ router.get('/', function (req, res, next) {
         })
     });
 });
+
 /* LIstar Laboratorios de un estudiante */
 router.get('/estudiantes/:id', function (req, res) {
     Laboratorio.find({estudiante:req.params.id}).select('-__v').exec().then(docs => {
