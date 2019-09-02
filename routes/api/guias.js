@@ -3,6 +3,7 @@ var router = express.Router();
 
 
 const Guia = require('../../database/models/guia');
+const Pregunta = require('../../database/models/pregunta');
 
 
 /* Agregar nuevo Guia */
@@ -56,6 +57,46 @@ router.get('/', function (req, res, next) {
         });
 });
 
+/* Obtener una Guia */
+router.get('/:id', function (req, res, next) {
+    let guia = {};
+
+    Guia.findOne({_id: req.params.id}).select('-__v -docente').populate({
+        path: 'curso',
+        select: '-__v -docente -gestion -fechaRegistro',
+        populate: { 
+            path: 'materia',
+            select: '-__v -fechaRegistro',
+        }}).exec()
+        .then(doc => {
+            if(doc == null){
+                return false;
+            }
+            else{
+                guia = doc;
+
+                return Pregunta.find({guia: doc._id}).exec()
+            }               
+        })
+        .then(docs => {
+            
+            if(docs === false){
+                return res.status(404).json({messageG: 'No se encontro la guia'});
+                
+            } 
+            else{
+                if (docs.length == 0) {
+                   return res.status(404).json({messageP: 'No se encontraron preguntas asociadas a la guia',guia});
+                }
+                res.json({guia,preguntas:docs});
+            }   
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err.message
+            })
+        });
+});
 
 
 

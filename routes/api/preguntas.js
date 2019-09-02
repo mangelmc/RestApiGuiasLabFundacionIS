@@ -11,7 +11,8 @@ router.post("/", (req, res) => {
         let datos = {
             guia:fields.guia,
             tipo:fields.tipo,
-            contenido:fields.contenido,
+            input:fields.input,
+            label:fields.label,
             respuesta:fields.respuesta,
             valorS100:fields.valorS100,            
         }
@@ -19,7 +20,7 @@ router.post("/", (req, res) => {
         modelPregunta.save()
           
           .then(result => {
-            res.status(201).json({message: 'Se Agrego  Pregunta',result});
+            res.status(201).json({message: 'Se Agrego la Pregunta',result});
           })
           .catch(err => {
             res.status(500).json({error:err.message})
@@ -30,7 +31,7 @@ router.get('/', function (req, res, next) {
 
     Pregunta.find().select('-__v').exec().then(docs => {
         if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Preguntas disponibles'});
+            return res.status(404).json({message: 'No existen Preguntas disponibles'});
         }
         res.json({data:docs});
     })

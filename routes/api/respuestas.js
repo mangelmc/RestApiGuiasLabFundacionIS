@@ -15,11 +15,11 @@ router.post("/", (req, res) => {
         respuesta:fields.respuesta,          
     }
     const modelRespuesta = new Respuesta(datos);
-    Respuesta.findOne({pregunta: fields.pregunta}).exec()
+    Respuesta.findOne({pregunta: fields.pregunta,laboratorio: fields.laboratorio}).exec()
     .then(doc=>{
         
         if (doc != null) {
-            res.status(200).json({error: 'La respuesta ya existe'});
+            res.status(200).json({error: 'La respuesta a la pregunta dada, ya existe'});
             return false;
         }else{
             return modelRespuesta.save()

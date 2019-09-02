@@ -10,10 +10,15 @@ const preguntaSchema = Schema({
     tipo: {
         type: String,
         required: 'Debe definir el tipo de pregunta'
-    },   
-    contenido: {
+    },
+    // cambiar el modelo   
+    label: {
         type: String,
-        required: 'falyta el contenido de pregunta'
+        required: 'falta la descripcon de pregunta'
+    },
+    input: {
+        type: String,
+        required: 'falta la entrada de pregunta'
     },
     respuesta: {
         type: String,
