@@ -67,20 +67,32 @@ router.get('/estadisticas', function (req, res, next) {
     //Estadistica de un curso
     if (req.query.curso != undefined && req.query.curso != '') {
         criterios._id = req.query.curso;  
+    }else{
+        return res.status(500).json({
+            error: 'Falta descripcion del curso'
+        });
     }
     //console.log(criterios);
     let allGuias;
-    Curso.find(criterios).select('-__v').populate('materia','-__v -fechaRegistro').exec()
-    .then(docs => {
-        if(docs.length == 0){
+    Curso.findOne(criterios).select('-__v').populate('materia','-__v -fechaRegistro').exec()
+    .then(doc => {
+        if(doc == null){
             return 'curso';
-            res.status(404).json({message: 'No se encontró ningun Curso'});
         }
-        let cursos = [];
+        /*.find(criterios) let cursos = [];
         for (let i = 0; i < docs.length; i++) {
             cursos.push({curso: docs[i]._id});            
-        }
-        return Guia.find().or(cursos).select("-contenidoHtml -fechaRegistro -__v").exec()
+        } .or(cursos)*/
+        return Guia.find({curso: doc._id}).select("-contenidoHtml -fechaRegistro -__v")
+        .populate({
+            path: 'curso',
+            select: '-__v -docente -fechaRegistro',
+            populate: { 
+                path: 'materia',
+                select: '-__v -fechaRegistro',
+                populate: {path: 'materia',select:'-__v'}
+            }
+          })
         res.json({data:docs});
     })
     .then(docs => {
@@ -107,9 +119,10 @@ router.get('/estadisticas', function (req, res, next) {
             return res.status(404).json({message: 'No se encontró ninguna Guía'});
         }else{
             if(docs.length == 0){
-                res.status(404).json({message: 'No se encontró ningun Laboratorio'});
+               return res.status(404).json({message: 'No se encontró ningun Laboratorio'});
             }
-            let guias = [];
+
+            /* let guias = [];
             for (let i = 0; i < allGuias.length; i++) {
                 let aux = {};
                 aux._id = allGuias[i]._id;
@@ -126,9 +139,9 @@ router.get('/estadisticas', function (req, res, next) {
 
             let guiass = {};
             guiass.as = 'sd';
-            guiass.ad = 'ad'
+            guiass.ad = 'ad' */
             
-            res.json({data:docs,guias,guiass});
+            res.json({data:docs,guias:allGuias});
         }
     })
     .catch(err => {
