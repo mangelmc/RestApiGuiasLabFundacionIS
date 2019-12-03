@@ -153,10 +153,11 @@ router.get('/estadisticas', function (req, res, next) {
 
 /* devolver un Curso */
 router.get('/:id', function (req, res) {
-    let criterios = {_id: req.params.id};    
+    let criterios = {_id: req.params.id}; 
+    //console.log(req.params.id);   
     Curso.findOne(criterios).select('-__v').populate('materia','-__v').exec().then(doc => {
         if(doc == null){
-            return res.status(404).json({message: 'No existe el Recurso'});
+            return res.status(404).json({message: 'No se encontro el Curso'});
         }
         res.json(doc);
     })

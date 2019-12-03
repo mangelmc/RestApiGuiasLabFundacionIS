@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 //const ObjectId = require('mongoose').Types.ObjectId;
 const sha1 = require('sha1');
+const jwt = require('jsonwebtoken');
 
 const Usuario = require('../../database/models/usuario');
 const Imagen = require('../../database/models/imagen');
@@ -83,10 +84,14 @@ upload(req, res, (error) => {
 
 //>>>>>>>>>>>>>>>>>>>> insecure
 router.get('/', function (req, res, next) {
-Usuario.find().select('-__v -password -fechaRegistro').exec().then(docs => {
-	if(docs.length == 0){
-		return res.status(404).json({message: 'no existen usuarios registrados'});
+	let criterios = {};
+	if (req.query.tipo != undefined) {
+		criterios.tipo = req.query.tipo
 	}
+	Usuario.find(criterios).select('-__v -password').exec().then(docs => {
+		if(docs.length == 0){
+			return res.status(404).json({message: 'no existen usuarios registrados'});
+		}
 	
 	res.json(docs);
 })
@@ -107,7 +112,7 @@ Usuario.findOne({email:req.body.email})
 .exec()
 .then(doc => {
 	if (doc != null) {
-	return res.status(400).json({error:'El correo ya esta en uso'});
+		return 'correo';
 	}
 
 	const datos = {
@@ -118,16 +123,23 @@ Usuario.findOne({email:req.body.email})
 	rud: req.body.rud,
 	tipo: req.body.tipo,//el tipo de usuario
 	};
+	console.log(req.body);
 	if (req.body.password == undefined || req.body.password == '') {
-	return res.status(400).json({
-		error: 'Falta la contraseña'
-	})
+		return 'password'
 	}    
 	datos.password = sha1(req.body.password);
 	//console.log(datos);    
 	var modelUsuario = new Usuario(datos);
 	return modelUsuario.save()               
 }).then((result) => {
+	if (result === 'password') {
+		return res.status(400).json({
+			error: 'Falta la contraseña'
+		})
+	}
+	if (result === 'correo') {
+		return res.status(400).json({error:'El correo ya esta en uso'});
+	}
 	res.json({
 		message: "Registro exitoso",
 		result
@@ -141,24 +153,25 @@ Usuario.findOne({email:req.body.email})
 });
 //login example
 router.post('/login', (req, res, next) => {
-Usuario.find({
+
+Usuario.findOne({
 		email: req.body.email
 	})
 	.exec()
 	.then(user => {
-		if (user.length < 1) {
+		if (user == null) {
 			return res.status(401).json({
-				message: "Usuario inexistente"
+				messageE: "Usuario inexistente"
 			});
 		}
-		if (req.body.password != user[0].password) {
+		if (sha1(req.body.password) != user.password) {
 			return res.status(400).json({
-				message: "Fallo al autenticar, verifique los datos"
+				messageE: "Fallo al autenticar, verifique los datos"
 			});
 		}else{
 			const token = jwt.sign({
-				email: user[0].email,
-				userId: user[0]._id
+				email: user.email,
+				userId: user._id
 				},
 				process.env.JWT_KEY || 'secret321', {
 					expiresIn: "1h"
@@ -166,7 +179,8 @@ Usuario.find({
 			
 			return res.status(200).json({
 				message: "Acceso correcto",
-				tipo: user[0].tipo,
+				tipo: user.tipo,
+				id: user._id,
 				token
 			});
 		}

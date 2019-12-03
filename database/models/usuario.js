@@ -12,7 +12,10 @@ const usuarioSchema = Schema({
         match: /^(([^<>()\[\]\.,;:\s @\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i,
     },
     password: String,
-    telefono: Number,
+    telefono: {
+        type: Number,
+        default: 0
+    },
     avatar: String,
     tipo: {
         type: String,

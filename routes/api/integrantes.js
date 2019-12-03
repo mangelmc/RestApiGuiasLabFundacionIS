@@ -1,3 +1,4 @@
+'use strict'
 var express = require('express');
 var router = express.Router();
 
@@ -30,7 +31,7 @@ router.post("/", (req, res) => {
 
 /* listar Integrantes */
 router.get('/', function (req, res, next) {
-    criterios = {};
+    let criterios = {};
 
     /* LIstar Integrantes de un Curso */
     if (req.query.curso != undefined) {
