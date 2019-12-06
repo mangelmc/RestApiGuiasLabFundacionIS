@@ -5,7 +5,7 @@ const preguntaSchema = Schema({
     guia: {
         type: Schema.Types.ObjectId,
         ref: "Guia",
-        require:'Falta info de la Guia'
+        required:'Falta info de la Guia'
     },
     tipo: {
         type: String,

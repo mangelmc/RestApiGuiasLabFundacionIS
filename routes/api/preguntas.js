@@ -28,8 +28,13 @@ router.post("/", (req, res) => {
 });
 /* listar Preguntas */
 router.get('/', function (req, res, next) {
-
-    Pregunta.find().select('-__v').exec().then(docs => {
+    let criterios = {};
+    //preg de una guia de un docente
+    if (req.query.guia != undefined && req.query.guia != '') {
+        criterios.guia = req.query.guia;
+       
+    }
+    Pregunta.find(criterios).select('-__v').exec().then(docs => {
         if(docs.length == 0){
             return res.status(404).json({message: 'No existen Preguntas disponibles'});
         }

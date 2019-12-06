@@ -6,12 +6,12 @@ const laboratorioSchema = Schema({
     guia: { // id de la guia
         type: Schema.Types.ObjectId,
         ref: "Guia",
-        require:'Falta info de Guia'
+        required:'Falta info de Guia'
     },
     estudiante: { //id del estudiante 
         type: Schema.Types.ObjectId,
         ref: "Usuario",
-        require:'Falta info del Estudiante'
+        required:'Falta info del Estudiante'
     },
     nota: {   //la nota total del alboratorio
         type: Number,

@@ -5,7 +5,7 @@ const respuestaSchema = Schema({
     laboratorio: {
         type: Schema.Types.ObjectId,
         ref: "Laboratorio",
-        require:'Falta info del Laboratorio'
+        required:'Falta info del Laboratorio'
     },/*
     estudiante: {
         type: Schema.Types.ObjectId,
@@ -15,7 +15,7 @@ const respuestaSchema = Schema({
     pregunta: {
         type: Schema.Types.ObjectId,
         ref: "Pregunta",
-        require:'Falta info de Pregunta'
+        required:'Falta info de Pregunta'
     },
     respuesta: {
         type: String,

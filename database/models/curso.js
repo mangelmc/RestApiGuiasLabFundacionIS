@@ -5,7 +5,7 @@ const cursoSchema = Schema({
     materia: {
         type: Schema.Types.ObjectId,
         ref: "Materia",
-        require:'Falta info de Materia'
+        required:'Falta info de Materia'
     },
     docente: {// /api/user/id ?
         type: Schema.Types.ObjectId,

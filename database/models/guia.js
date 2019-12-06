@@ -6,12 +6,12 @@ const guiaSchema = Schema({
     curso: {
         type: Schema.Types.ObjectId,
         ref: "Curso",
-        require:'Falta info de Curso'
+        required:'Falta info de Curso'
     },
     docente: {
         type: Schema.Types.ObjectId,
         ref: "Usuario",
-        require:'Falta info de Docente'
+        required:'Falta info de Docente'
     },
     numero: {   // 1, 2 , etc
         type: Number,

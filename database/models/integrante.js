@@ -6,12 +6,12 @@ const integranteSchema = Schema({
     curso: {
         type: Schema.Types.ObjectId,
         ref: "Curso",
-        require:'Falta info de Curso'
+        required:'Falta info de Curso'
     },
     estudiante: {
         type: Schema.Types.ObjectId,
         ref: "Usuario",
-        require:'Falta info del Estudiante'
+        required:'Falta info del Estudiante'
     },
     gestion: {   // es necesario ???? 00/0000 ex 01/2019 
         type: String,

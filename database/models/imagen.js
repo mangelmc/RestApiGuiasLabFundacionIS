@@ -7,7 +7,7 @@ const imagenSchema = Schema({
     usuario:{
         type: Schema.Types.ObjectId,
         ref: "Usuario",
-        require:'Falta info de Docente'
+        required:'Falta info de Docente'
     },
     path : String,   
     fechaRegistro: {
