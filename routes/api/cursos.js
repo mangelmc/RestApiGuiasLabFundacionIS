@@ -35,7 +35,7 @@ router.get('/', function (req, res, next) {
         criterios.docente = req.query.docente;
         //console.log(criterios);
     }
-    Curso.find(criterios).select('-__v').populate('materia','-__v').exec().then(docs => {
+    Curso.find(criterios).select('-__v').populate('materia','-__v').populate('docente','-__v').exec().then(docs => {
         if(docs.length == 0){
         return res.status(404).json({message: 'No existen Cursos disponibles'});
         }
@@ -55,8 +55,8 @@ router.get('/estadisticas', function (req, res, next) {
         criterios.gestion = req.query.gestion;
         //console.log(criterios);
     }else{
-        let anio = new Date().getFullYear();
-        criterios.gestion = new RegExp('[0-9]{2}\/' + anio  ,'gm');
+        //let anio = new Date().getFullYear();
+        //criterios.gestion = new RegExp('[0-9]{2}\/' + anio  ,'gm');
        
     }
     //Estadisticas los curso de un docente
@@ -72,7 +72,7 @@ router.get('/estadisticas', function (req, res, next) {
             error: 'Falta descripcion del curso'
         });
     }
-    //console.log(criterios);
+    console.log(criterios);
     let allGuias;
     Curso.findOne(criterios).select('-__v').populate('materia','-__v -fechaRegistro').exec()
     .then(doc => {
