@@ -17,19 +17,28 @@ router.post("/", (req, res) => {
             datos.tiempo = fields.tiempo
         }
         const modelLaboratorio = new Laboratorio(datos);
-        modelLaboratorio.save()
-          
-          .then(result => {
-            res.status(201).json({message: 'Se Agrego  Laboratorio',result});
-          })
-          .catch(err => {
-            res.status(500).json({error:err.message})
-          });  
+        Laboratorio.findOne({guia:fields.guia,estudiante:fields.estudiante}).exec()
+            .then(result=>{
+                if (result != null) {
+                    return  'exists'
+                }else{
+                    return modelLaboratorio.save()
+                }
+            })
+            .then(result => {
+                if (result === 'exists') {
+                    return res.status(400).json({message: 'El laboratorio ya existe'});
+                }
+                res.status(201).json({message: 'Se Agrego  Laboratorio',result});
+            })
+            .catch(err => {
+                res.status(500).json({error:err.message})
+            });  
 });
 /* listar Laboratorios */
 router.get('/', function (req, res, next) {
 
-    Laboratorio.find().select('-__v').exec().then(docs => {
+    Laboratorio.find().select('-__v').populate('guia','-contenidoHtml -docente -fechaRegistro -__v').populate('estudiante','-tipo -fechaRegistro -password -__v').exec().then(docs => {
         if(docs.length == 0){
             return res.status(404).json({message: 'No existen Laboratorios disponibles'});
         }

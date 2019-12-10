@@ -18,13 +18,22 @@ router.post("/", (req, res) => {
     }
 
     const modelIntegrante = new Integrante(datos);
-    modelIntegrante.save()
-        
+    Integrante.findOne(datos).exec()
+        .then(result=>{
+            if (result != null) {
+                return `exists`;
+            }else{
+                return modelIntegrante.save()
+            }
+        })
         .then(result => {
-        res.status(201).json({message: 'Se Agrego  Integrante',result});
+            if (result === `exists`) {
+                return res.status(400).json({message: 'Ya existe el integrante del curso'});
+            }
+            res.status(201).json({message: 'Se Agrego  Integrante',result});
         })
         .catch(err => {
-        res.status(500).json({error:err.message})
+            res.status(500).json({error:err.message})
         });  
 });
 

@@ -18,14 +18,23 @@ router.post("/", (req, res) => {
         }
 
         const modelCurso = new Curso(datos);
-        modelCurso.save()
-          
-          .then(result => {
-            res.status(201).json({message: 'Se Agrego el Curso',result});
-          })
-          .catch(err => {
-            res.status(500).json({error:err.message})
-          });  
+        Curso.findOne(datos).exec()
+            .then(result => {
+                if (result != null) {
+                    return `exists`;
+                }else{
+                    return modelCurso.save()
+                }
+            })          
+            .then(result => {
+                if (result === 'exists') {
+                    return res.status(400).json({message: 'El curso ya existe'});
+                }
+                res.status(201).json({message: 'Se agrego el curso',result});
+            })
+            .catch(err => {
+                res.status(500).json({error:err.message})
+            });  
 });
 /* listar Cursos */
 router.get('/', function (req, res, next) {
