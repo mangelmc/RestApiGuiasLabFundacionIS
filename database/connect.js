@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 mongoose.connect("mongodb://localhost:27017/guiasLab", {
     useNewUrlParser: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    useUnifiedTopology: true
 }).then(() => {
     console.log('Conexion a MongoDB exitosa..! :)');
 }).catch(err => {
