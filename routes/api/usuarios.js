@@ -181,6 +181,9 @@ Usuario.findOne({
 				message: "Acceso correcto",
 				tipo: user.tipo,
 				id: user._id,
+				nombre: user.nombre,
+				rud: user.rud,
+				email: user.email,
 				token
 			});
 		}
