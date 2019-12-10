@@ -17,14 +17,26 @@ router.post("/", (req, res) => {
         }
 
         const modelGuia = new Guia(datos);
-        modelGuia.save()
-          
-          .then(result => {
-            res.status(201).json({message: 'Se Agrego  Guia',result});
-          })
-          .catch(err => {
-            res.status(500).json({error:err.message})
-          });  
+        Guia.findOne({
+            curso:fields.curso,
+            numero:fields.numero
+        }).exec()
+            .then(result => {
+                if (result != null) {
+                    return `exists`;
+                }else{
+                    return modelGuia.save()
+                }
+            })
+            .then(result => {
+                if (result === `exists`) {
+                    res.status(400).json({message: 'Ya existe la guia con el mismo numero'})
+                }
+                res.status(201).json({message: 'Se Agrego  Guia',result});
+            })
+            .catch(err => {
+                res.status(500).json({error:err.message})
+            });  
 });
 /* listar Guias */
 router.get('/', function (req, res, next) {
