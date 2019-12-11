@@ -30,7 +30,7 @@ router.post("/", (req, res) => {
             if (result === `exists`) {
                 return res.status(400).json({message: 'Ya existe el integrante del curso'});
             }
-            res.status(201).json({message: 'Se Agrego  Integrante',result});
+            res.status(201).json({message: 'Se Agrego  Integrante al Curso',result});
         })
         .catch(err => {
             res.status(500).json({error:err.message})
@@ -65,7 +65,7 @@ router.get('/', function (req, res, next) {
     });
 });
 
-/* listar Integrantes de todas los cursos de un docente*/
+/* listar Integrantes de todos los cursos de un docente*/
 router.get('/docentes/:id', function (req, res) {
     
     let docente  = req.params.id;
@@ -127,28 +127,42 @@ router.get('/docentes/:id', function (req, res) {
 
 // Informacion del estudiante y sus laboratorios
 router.get('/:id', function (req, res) {
+    let idUsuario = req.params.id;
     let usuario = {};
-    Usuario.findOne({_id: req.params.id}).select('-__v -password -fechaRegistro').exec()
+    Usuario.findOne({_id: idUsuario,tipo:'estudiante'}).select('-__v -password -fechaRegistro').exec()
     .then(doc => {
         //console.log(doc);
         if(doc == null){
             
             return false;//
         }else {
+            let criterios = {estudiante: idUsuario};
+            if (req.query.curso != undefined && req.query.curso.length == 24 ) {
+                criterios.curso = req.query.curso;
+            }
             usuario = doc;
-            return Laboratorio.find({estudiante: req.params.id}).select('-__v').populate('guia').exec();
+            return Integrante.find(criterios).select('-__v').populate({
+                path: 'curso',
+                select: '-__v -docente -fechaRegistro -estudiante',
+                populate: { 
+                    path: 'materia',
+                    select: '-__v ',
+                    }
+                }).exec();
+              
         }   
     })
     .then(docs => {
         //console.log(usuario,docs.length);
+        
         if (docs === false) {
-            return res.status(404).json({messageU: 'No se encontro el usuario'});
+            return res.status(404).json({messageU: 'No se encontro el estudiante'});
         }else{
             if(docs.length == 0){
-                return res.status(404).json({messageL: 'No existen Laboratorios registrados',usuario});
+                return res.status(404).json({messageC: 'El estudiante no esta registrado en ningun curso',usuario});
             }
             //console.log(docs[0].fechaRegistro.getDate() );
-            res.json({data:docs,usuario});
+            res.json({integrantes:docs,usuario});
         } 
     })
     .catch(err => {

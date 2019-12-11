@@ -51,7 +51,7 @@ router.get('/', function (req, res, next) {
     }
     Guia.find(criterios).select('-__v -docente').populate({
         path: 'curso',
-        select: '-__v -docente -gestion -fechaRegistro',
+        select: '-__v -docente -fechaRegistro',
         populate: { 
             path: 'materia',
             select: '-__v -fechaRegistro',

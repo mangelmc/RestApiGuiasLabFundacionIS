@@ -4,6 +4,10 @@ var router = express.Router();
 
 const Laboratorio = require('../../database/models/laboratorio');
 const Respuesta = require('../../database/models/respuesta');
+const Curso = require('../../database/models/curso');
+const Guia = require('../../database/models/guia');
+
+
 
 
 /* Agregar nuevo Laboratorio */
@@ -51,13 +55,39 @@ router.get('/', function (req, res, next) {
     });
 });
 
-/* LIstar Laboratorios de un estudiante */
-router.get('/estudiantes/:id', function (req, res) {
-    Laboratorio.find({estudiante:req.params.id}).select('-__v').exec().then(docs => {
+/* LIstar Laboratorios de un estudiante por curso*/
+router.get('/estudiante/:id', function (req, res) {
+    idEstudiante = req.params.id;
+    let criterios = {};
+    if (req.query.curso != undefined && req.query.curso.length == 24 ) {
+        criterios.curso = req.query.curso;
+    }else{
+        return res.status(400).json({message: 'Debe especificar curso'});
+    }
+    Guia.find(criterios).select('_id').exec()
+    //Laboratorio.find({estudiante:req.params.id}).select('-__v').exec()
+    .then(docs => {
         if(docs.length == 0){
-        return res.status(404).json({message: 'No existen Laboratorios registrados'});
+            return 'notfound';
         }
-        res.json({data:docs});
+        let guias = [];
+        for (let i = 0; i < docs.length; i++) {
+            guias.push({guia: docs[i]._id,estudiante:idEstudiante});            
+        }
+        //allGuias = docs;
+        //console.log(guias);
+        return Laboratorio.find().or(guias).populate('guia','-__v -contenidoHtml').exec()
+        
+    })
+    .then(docs => {
+        if(docs == 'notfound'){
+            return res.status(404).json({message: 'No existen Guias registradas'});
+        }else{
+            if (docs.length == 0) {
+                return res.status(404).json({message: 'No existen Laboratporios registrados'});
+            }
+            res.json({labs:docs});
+        }
     })
     .catch(err => {
         res.status(500).json({
@@ -82,22 +112,25 @@ router.get('/:id', function (req, res) {
 	  })
 	.populate('estudiante','-__v -password').exec()
 	.then(doc => {
-		if(doc == null){
+        //console.log('lab',doc);
+		if(doc === null){
+           
 			return false;//
-		}else {
-			laboratorio = doc;
+		}else {            
+            laboratorio = doc;
 			return Respuesta.find({laboratorio: req.params.id}).select('-__v').populate('pregunta','-__v').exec();
 		}   
 	})
 	.then(docs => {
 		//console.log(laboratorio);
-		if (docs != false) {
-			if(docs.length == 0){
-				return res.status(404).json({messageR: 'No se encontro el recurso',laboratorio});
+		if (docs === false) {
+			return res.status(404).json({messageL: 'No se encontro el laboratorio'});
+		}else{
+            //console.log(docs);
+            if(docs.length == 0){
+				return res.status(404).json({messageR: 'No se encontraron las respuestas asociadas al laboratorio ',laboratorio});
 			}
 			res.json({data:docs,laboratorio});
-		}else{
-			return res.status(404).json({messageL: 'No se encontro el laboratorio'});
 		} 
 	})
 	.catch(err => {

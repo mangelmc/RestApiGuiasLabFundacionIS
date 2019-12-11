@@ -44,7 +44,7 @@ router.get('/', function (req, res, next) {
         criterios.docente = req.query.docente;
         //console.log(criterios);
     }
-    Curso.find(criterios).select('-__v').populate('materia','-__v').populate('docente','-__v').exec().then(docs => {
+    Curso.find(criterios).select('-__v').populate('materia','-__v').populate('docente','-password -tipo -__v').exec().then(docs => {
         if(docs.length == 0){
         return res.status(404).json({message: 'No existen Cursos disponibles'});
         }
