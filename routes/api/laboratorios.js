@@ -84,9 +84,51 @@ router.get('/estudiante/:id', function (req, res) {
             return res.status(404).json({message: 'No existen Guias registradas'});
         }else{
             if (docs.length == 0) {
-                return res.status(404).json({message: 'No existen Laboratporios registrados'});
+                return res.status(404).json({message: 'No existen Laboratorios registrados'});
             }
             res.json({labs:docs});
+        }
+    })
+    .catch(err => {
+        res.status(500).json({
+            error: err.message
+        })
+    });
+});
+/* estadistica de un estudiente*/
+router.get('/estadistica/:id', function (req, res) {
+    idEstudiante = req.params.id;
+    let criterios = {};
+    let countGuias = 0;
+    if (req.query.curso != undefined && req.query.curso.length == 24 ) {
+        criterios.curso = req.query.curso;
+    }else{
+        return res.status(400).json({message: 'Debe especificar curso'});
+    }
+
+    Guia.find(criterios).select('_id').exec()
+    //Laboratorio.find({estudiante:req.params.id}).select('-__v').exec()
+    .then(docs => {
+        if(docs.length == 0){
+            return 'notfound';
+        }
+        let guias = [];
+        countGuias = docs.length;
+        for (let i = 0; i < docs.length; i++) {
+            guias.push({guia: docs[i]._id,estudiante:idEstudiante});            
+        }
+        //allGuias = docs;
+        //console.log(guias);
+        return Laboratorio.find().or(guias).exec()
+    })
+    .then(docs => {
+        if(docs == 'notfound'){
+            return res.status(404).json({message: 'No existen Guias registradas'});
+        }else{
+            if (docs.length == 0) {
+                return res.status(404).json({message: 'No existen Laboratorios registrados'});
+            }
+            res.json({labs:docs,guias:countGuias});
         }
     })
     .catch(err => {
