@@ -15,11 +15,14 @@ const respuestaSchema = Schema({
     pregunta: {
         type: Schema.Types.ObjectId,
         ref: "Pregunta",
-        required:'Falta info de Pregunta'
+        //required:'Falta info de Pregunta'
     },
     respuesta: {
         type: String,
         default: ''
+    },
+    url: {
+        type: String,
     },    
     calificacion: {
         type: Number,

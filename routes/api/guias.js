@@ -5,7 +5,99 @@ var router = express.Router();
 const Guia = require('../../database/models/guia');
 const Pregunta = require('../../database/models/pregunta');
 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 
+const storage = multer.diskStorage({
+	destination: function (res, file, cb) {
+		try {
+			fs.statSync('./public/');
+		} catch (e) {
+			fs.mkdirSync('./public/');
+		}
+		cb(null, './public/');
+	},
+	filename: (res, file, cb) => {
+		cb(null, 'PDFG-' + Date.now() + path.extname(file.originalname))
+	}
+})
+const fileFilter = (req, file, cb) => {
+if ( file.mimetype === 'application/pdf' ) {
+	return cb(null, true);
+}
+return cb(new Error('Solo se admiten pdfs'));
+}
+
+const upload = multer({
+storage: storage,
+fileFilter: fileFilter,
+limits: {
+	fileSize: 1024 * 1024 * 20
+}
+}).single('file');
+/* 
+
+*/
+/* Agregar guia pdf */
+router.post("/file", (req, res) => {
+    console.log(req.body);
+    upload(req, res, (error) => {
+        if(error){
+            return res.status(500).json({
+                "error" : error.message
+            });
+        }else{
+        if (req.file == undefined) {
+            return res.status(400).json({
+            "error" : 'No se recibio el pdf'
+            });
+        }
+        var fields = req.body;
+        let datos = {
+            curso:fields.curso,
+            numero:fields.numero,
+            contenidoHtml:req.file.filename,
+            docente:fields.docente,
+            tipo:fields.tipo,
+        }
+        //console.log(req.file);
+        const modelGuia = new Guia(datos);
+        Guia.findOne({
+            curso:fields.curso,
+            numero:fields.numero
+        }).exec()
+            .then(result => {
+                if (result != null) {
+                    return `exists`;
+                }else{
+                    return modelGuia.save()
+                }
+            })
+            .then(result => {
+                if (result === `exists`) {
+                    fs.unlink(req.file.path, function(err){
+                        if(err) {console.log(err);}// do something with error
+                        else{
+                            console.log('remove done');
+                        }
+                      });
+                    return res.status(400).json({message: 'Ya existe la guia con el mismo numero'})
+                }
+                res.status(201).json({message: 'Se Agrego  Guia en pdf' ,result});
+            })
+            .catch(err => {
+                fs.unlink(req.file.path, function(err){
+                    if(err) {console.log(err);}// do something with error
+                    else{
+                        console.log('remove done');
+                    }
+                  });
+                res.status(500).json({error:err.message})
+            });   
+        }
+    });
+});
 /* Agregar nuevo Guia */
 router.post("/", (req, res) => {
         let fields = req.body;
@@ -13,7 +105,8 @@ router.post("/", (req, res) => {
             curso:fields.curso,
             numero:fields.numero,
             contenidoHtml:fields.contenidoHtml,
-            docente:fields.docente
+            docente:fields.docente,
+            tipo: fields.tipo,
         }
 
         const modelGuia = new Guia(datos);
@@ -48,6 +141,10 @@ router.get('/', function (req, res, next) {
     /* LIstar Guias de un curso */
     if (req.query.curso != undefined) {
         criterios.curso = req.query.curso;
+    }
+    /* LIstar Guias de un curso */
+    if (req.query.tipo != undefined) {
+        criterios.tipo = req.query.tipo;
     }
     Guia.find(criterios).select('-__v -docente').populate({
         path: 'curso',

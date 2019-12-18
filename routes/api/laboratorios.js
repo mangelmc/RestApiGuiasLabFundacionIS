@@ -142,17 +142,17 @@ router.get('/:id', function (req, res) {
     
 	let laboratorio = {};
 	
-	Laboratorio.findOne({_id: req.params.id}).select('-__v ')
+	Laboratorio.findOne({_id: req.params.id}).select('-__v ') 
 	.populate({
 		path: 'guia',
-		select: '-__v',
+		select: '-__v'/* ,
 		populate: { 
 			path: 'curso',
 			select: '-__v',
 			populate: {path: 'materia',select:'-__v'}
-		}
-	  })
-	.populate('estudiante','-__v -password').exec()
+		} */
+	  })/*
+	.populate('estudiante','-__v -password') */.exec()
 	.then(doc => {
         //console.log('lab',doc);
 		if(doc === null){
@@ -182,7 +182,7 @@ router.get('/:id', function (req, res) {
 	});
 });
 
-	
+    
 
 
 
@@ -223,7 +223,7 @@ router.delete('/:id', function (req, res) {
     let idLaboratorio = req.params.id;
     Laboratorio.deleteOne({_id: idLaboratorio}).exec()
         .then(result => {
-            let message = 'Se elimino el reLaboratorio';
+            let message = 'Se elimino el Laboratorio';
             if (result.ok == 0) {
                 message = 'Verifique los datos, no se realizaron cambios';
             }

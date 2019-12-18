@@ -18,9 +18,14 @@ const guiaSchema = Schema({
         required: 'Falta el numero de guia'
     },    
     contenidoHtml: {  
+        //intro o texto renderizado a html antes de las preguntas o url archhivo
+        type: String,
+        //required: 'Falta titulo y/o descripcion'
+    },    
+    tipo: {  
         //intro o texto renderizado a html antes de las preguntas
         type: String,
-        required: 'Falta titulo y/o descripcion'
+        required: 'debe definir tipo de laboratorio '
     },      
     fechaRegistro: {
         type: Date,

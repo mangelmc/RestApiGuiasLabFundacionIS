@@ -1,10 +1,89 @@
 var express = require('express');
 var router = express.Router();
 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
 
 const Respuesta = require('../../database/models/respuesta');
 
+const storage = multer.diskStorage({
+	destination: function (res, file, cb) {
+		try {
+			fs.statSync('./public/');
+		} catch (e) {
+			fs.mkdirSync('./public/');
+		}
+		cb(null, './public/');
+	},
+	filename: (res, file, cb) => {
+		cb(null, 'PDFL-' + Date.now() + path.extname(file.originalname))
+	}
+})
+const fileFilter = (req, file, cb) => {
+if ( file.mimetype === 'application/pdf' ) {
+	return cb(null, true);
+}
+return cb(new Error('Solo se admiten pdfs'));
+}
 
+const upload = multer({
+storage: storage,
+fileFilter: fileFilter,
+limits: {
+	fileSize: 1024 * 1024 * 10
+}
+}).single('file');
+/* 
+
+*/
+/* Agregar respuesta a lab */
+router.post("/file", (req, res) => {
+    console.log(req.body);
+    upload(req, res, (error) => {
+        if(error){
+            return res.status(500).json({
+                "error" : error.message
+            });
+        }else{
+        if (req.file == undefined) {
+            return res.status(400).json({
+            "error" : 'No se recibio el pdf'
+
+            });
+        }
+        
+        var fields = req.body;
+    
+        var datos = {
+            laboratorio:fields.laboratorio,
+            url : req.file.filename,
+            respuesta:fields.respuesta,          
+        }
+        const modelRespuesta = new Respuesta(datos);
+        Respuesta.findOne({url: fields.url,laboratorio: fields.laboratorio}).exec()
+            .then(doc=>{
+                
+                if (doc != null) {
+                    res.status(200).json({error: 'La respuesta a la pregunta dada, ya existe'});
+                    return false;
+                }else{
+                    return modelRespuesta.save()
+                }   
+            })        
+            .then(result => {
+                
+                if (result != false) {
+                    res.status(201).json({message: 'Se Agrego  Respuesta',result});
+                }
+            })
+            .catch(err => {
+                res.status(500).json({error:err.message})
+            });  
+        }
+    });
+});
 /* Agregar nuevo Respuesta */
 router.post("/", (req, res) => {
     let fields = req.body;
@@ -70,7 +149,51 @@ router.get('/laboratorio/:id', function (req, res, next) {
     });
 });
 
+/* Ctualizar respuesta a lab pdf*/
+router.patch("/file", (req, res) => {
+    //console.log(req.body);
+    upload(req, res, (error) => {
+        if(error){
+            return res.status(500).json({
+                "error" : error.message
+            });
+        }else{
+        if (req.file == undefined) {
+            return res.status(400).json({
+            "error" : 'No se recibio el pdf'
 
+            });
+        }
+        
+        var fields = req.body;
+    
+        var datos = {
+            url : req.file.filename,
+        }
+        
+        Respuesta.updateOne({_id: fields.id},datos).exec()
+            .then(result => {
+                let message = 'Datos actualizados';
+                if (result.ok == 0) {
+                    message = 'Verifique los datos, no se realizaron cambios';
+                }
+                if (result.ok == 1 && result.n == 0) {
+                    message = 'No se encontro el reRespuesta';
+                }
+                if (result.ok == 1 && result.n == 1 && result.nModified == 0) {
+                    message = 'Se recibieron los mismos datos antiguos,no se realizaron cambios';
+                }
+                res.json({
+                    message,
+                    result
+                });
+            })
+            .catch(err => {
+                res.status(500).json({error:err.message})
+            });  
+        }
+    });
+});
 
 router.patch('/:id', function (req, res) {
     
